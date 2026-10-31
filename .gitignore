@@ -1,0 +1,23 @@
+﻿# Secrets
+.env
+
+# Data (too big for Git)
+data/raw/
+data/processed/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+.ruff_cache/
+
+# Editors and OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Docker volumes and logs
+logs/
+postgres_data/
