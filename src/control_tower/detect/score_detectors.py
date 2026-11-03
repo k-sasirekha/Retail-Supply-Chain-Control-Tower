@@ -18,7 +18,7 @@ SELECT d.detector, l.anomaly_type, count(*) AS labels,
              AND x.entity_id = l.entity_id
              AND x.event_ts >= l.start_ts AND x.event_ts < l.end_ts)) AS caught
 FROM anomaly_labels l
-CROSS JOIN (SELECT DISTINCT detector FROM detected_anomalies) d
+JOIN (SELECT DISTINCT detector, anomaly_type FROM detected_anomalies) d ON d.anomaly_type = l.anomaly_type
 GROUP BY d.detector, l.anomaly_type
 """
 
