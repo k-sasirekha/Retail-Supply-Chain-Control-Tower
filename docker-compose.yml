@@ -40,5 +40,26 @@
       --firstname Admin --lastname User --role Admin --email admin@example.com ;
       airflow scheduler & exec airflow webserver"
 
+  superset:
+    build: ./docker/superset
+    container_name: ct_superset
+    restart: unless-stopped
+    env_file: .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SUPERSET_CONFIG_PATH: /app/pythonpath/superset_config.py
+    ports:
+      - "8088:8088"
+    volumes:
+      - ./docker/superset/superset_config.py:/app/pythonpath/superset_config.py
+    command: >
+      bash -c "superset db upgrade &&
+      superset fab create-admin --username admin --firstname Admin --lastname User
+      --email admin@example.com --password ${SUPERSET_ADMIN_PASSWORD} ;
+      superset init &&
+      exec superset run -h 0.0.0.0 -p 8088 --with-threads"
+
 volumes:
   postgres_data:
