@@ -2,6 +2,7 @@
 
 Trains on data up to TRAIN_END, forecasts the days after it, and stores the forecast
 next to what really sold. Prophet is trained on real demand only (injected spikes excluded).
+Products are chosen using only data before TRAIN_END, so the test period is never peeked at.
 Re-running replaces the old results.
 """
 import logging
@@ -21,10 +22,12 @@ for noisy in ("cmdstanpy", "prophet"):
     logging.getLogger(noisy).setLevel(logging.WARNING)
 
 INJECTED_ID_START = 100_000_000
-TRAIN_END = pd.Timestamp("2017-10-31")
-TEST_END = pd.Timestamp("2018-01-31")
+TRAIN_END = pd.Timestamp("2017-06-30")
+TEST_END = pd.Timestamp("2017-09-30")
 N_PRODUCTS = 30
 MIN_HISTORY_DAYS = 365
+RECENT_DAYS = 90
+MIN_RECENT_UNITS = 30
 
 
 def load_daily(engine: Engine) -> pd.DataFrame:
@@ -43,10 +46,14 @@ def load_daily(engine: Engine) -> pd.DataFrame:
 
 
 def pick_products(daily: pd.DataFrame) -> list[int]:
-    """The best sellers (real units before TRAIN_END) with at least a year of history."""
+    """Best sellers before TRAIN_END that have a year of history and are still selling."""
     train = daily[daily["day"] <= TRAIN_END]
+    recent_start = TRAIN_END - pd.Timedelta(days=RECENT_DAYS)
     stats = train.groupby("product_id").agg(units=("real_qty", "sum"), first_day=("day", "min"))
-    eligible = stats[(TRAIN_END - stats["first_day"]).dt.days >= MIN_HISTORY_DAYS]
+    stats["recent_units"] = train[train["day"] > recent_start].groupby("product_id")["real_qty"].sum()
+    stats["recent_units"] = stats["recent_units"].fillna(0)
+    long_enough = (TRAIN_END - stats["first_day"]).dt.days >= MIN_HISTORY_DAYS
+    eligible = stats[long_enough & (stats["recent_units"] >= MIN_RECENT_UNITS)]
     return [int(p) for p in eligible.sort_values("units", ascending=False).head(N_PRODUCTS).index]
 
 
@@ -95,6 +102,12 @@ def main() -> None:
         log.info("%d/%d: product %d done", i, len(products), pid)
 
     result = pd.concat(frames, ignore_index=True)
+    test_units = int(result["actual_real"].sum())
+    if test_units == 0:
+        log.error("No real sales in the test window. The scores would be meaningless.")
+    else:
+        log.info("Real units sold in the test window: %d", test_units)
+
     with engine.begin() as conn:
         conn.execute(text("TRUNCATE demand_forecasts"))
     result.to_sql("demand_forecasts", engine, if_exists="append", index=False, chunksize=5000, method="multi")
