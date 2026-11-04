@@ -1,7 +1,7 @@
 """Alert engine: check KPI thresholds from alert_config and deduplicate against alert_log.
 
 Default is a dry run that only prints. With --record, new alerts are written to alert_log
-(status 'recorded') so deduplication can be tested before any message is sent.
+(status 'pending') so deduplication can be tested before any message is sent.
 """
 import argparse
 import logging
@@ -150,12 +150,12 @@ def is_suppressed(conn: Connection, rule_name: str, entity_key: str, cooldown_ho
 
 
 def record(conn: Connection, c: Candidate) -> None:
-    """Write an alert to alert_log (status 'recorded': nothing has been sent)."""
+    """Write an alert to alert_log (status 'pending': nothing has been sent)."""
     conn.execute(
         text(
             "INSERT INTO alert_log (rule_name, entity_key, severity, message, metric_value, threshold, "
             "data_ts, slack_status, email_status) VALUES (:rule_name, :entity_key, :severity, :message, "
-            ":metric_value, :threshold, :data_ts, 'recorded', 'recorded')"
+            ":metric_value, :threshold, :data_ts, 'pending', 'pending')"
         ),
         asdict(c),
     )
