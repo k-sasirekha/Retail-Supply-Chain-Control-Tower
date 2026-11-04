@@ -28,6 +28,7 @@
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/airflow
       AIRFLOW__WEBSERVER__SECRET_KEY: ct-local-secret-key
       POSTGRES_HOST: postgres
+      SMTP_HOST: mailhog
       PYTHONPATH: /opt/airflow/src
     ports:
       - "8080:8080"
@@ -60,6 +61,14 @@
       --email admin@example.com --password ${SUPERSET_ADMIN_PASSWORD} ;
       superset init &&
       exec superset run -h 0.0.0.0 -p 8088 --with-threads"
+
+  mailhog:
+    image: mailhog/mailhog:v1.0.1
+    container_name: ct_mailhog
+    restart: unless-stopped
+    ports:
+      - "1025:1025"
+      - "8025:8025"
 
 volumes:
   postgres_data:
