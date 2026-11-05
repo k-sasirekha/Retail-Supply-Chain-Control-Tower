@@ -42,7 +42,7 @@ MEASURED_EARLIER = [
     ("Robust z-score demand detector (v2)", "3.5 s"),
     ("Prophet backtest, 14 products, 92 test days", "5.6 s"),
     ("Stock risk (forecast vs stock), 30 products", "11.3 s"),
-    ("Full hourly DAG run (4 tasks, in Airflow)", "about 5 s"),
+    ("Full hourly DAG run (4 tasks, in Airflow)", "5 to 8 s"),
     ("Unit tests (19)", "2 to 5 s"),
 ]
 INDEX_QUERY = (
@@ -152,7 +152,7 @@ def main() -> None:
         "## Pipeline",
         "",
         f"- Successful hourly runs recorded so far: {runs[0]}",
-        "- Time per run: about 1 to 1.5 s per task and about 5 s for the whole DAG, measured in Airflow.",
+        "- Time per run: about 1 to 2 s per task and about 5 to 8 s for the whole DAG (4 tasks), measured in Airflow, depending on machine load.",
         "",
         "## Timings from earlier runs (taken from the run logs)", "",
         md_table(pd.DataFrame(MEASURED_EARLIER, columns=["step", "time"])), "",

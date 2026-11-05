@@ -24,25 +24,25 @@ Replay clock at measurement time: 2017-01-13 00:00:00.
 
 | view | rows returned | median ms (7 runs) |
 | --- | --- | --- |
-| v_kpi_stockout_daily | 743 | 22.1 |
-| v_kpi_ontime_daily | 2822 | 176.4 |
-| v_kpi_supplier_leadtime | 195 | 8.3 |
-| v_kpi_days_of_inventory | 54 | 31.5 |
+| v_kpi_stockout_daily | 743 | 16.3 |
+| v_kpi_ontime_daily | 2822 | 141.7 |
+| v_kpi_supplier_leadtime | 195 | 5.5 |
+| v_kpi_days_of_inventory | 54 | 28.9 |
 | v_stock_risk | 30 | 1.5 |
-| v_detector_scores | 5 | 6.7 |
-| v_whatif_stockout | 180 | 1227.8 |
+| v_detector_scores | 5 | 6.0 |
+| v_whatif_stockout | 180 | 710.3 |
 
 ## Index effect
 
 Query: units sold of the best-selling product over three months, on the orders table.
 
-- With the indexes `idx_orders_product_ts` and `idx_orders_ts`: 2.4 ms (index scan)
-- Without them: 33.0 ms (sequential scan (whole table))
+- With the indexes `idx_orders_product_ts` and `idx_orders_ts`: 1.4 ms (index scan)
+- Without them: 28.7 ms (sequential scan (whole table))
 
 ## Pipeline
 
 - Successful hourly runs recorded so far: 12
-- Time per run: about 1 to 1.5 s per task and about 5 s for the whole DAG, measured in Airflow.
+- Time per run: about 1 to 2 s per task and about 5 to 8 s for the whole DAG (4 tasks), measured in Airflow, depending on machine load.
 
 ## Timings from earlier runs (taken from the run logs)
 
@@ -55,7 +55,7 @@ Query: units sold of the best-selling product over three months, on the orders t
 | Robust z-score demand detector (v2) | 3.5 s |
 | Prophet backtest, 14 products, 92 test days | 5.6 s |
 | Stock risk (forecast vs stock), 30 products | 11.3 s |
-| Full hourly DAG run (4 tasks, in Airflow) | about 5 s |
+| Full hourly DAG run (4 tasks, in Airflow) | 5 to 8 s |
 | Unit tests (19) | 2 to 5 s |
 
 ## Anomaly detection against the labeled anomalies
