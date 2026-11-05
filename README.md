@@ -12,7 +12,7 @@ A near real-time view of inventory, deliveries and suppliers that warns about pr
 - Shows three Superset dashboards, including a what-if panel (supplier delayed by 0, 3, 5, 7, 10 or 14 days).
 - Sends deduplicated alerts to Slack and email, with thresholds stored in a database table.
 
-See [docs/architecture.md](docs/architecture.md) for the diagram and [docs/results.md](docs/results.md) for every measured number.
+See [docs/architecture.md](docs/architecture.md) for the diagram, [docs/data_dictionary.md](docs/data_dictionary.md) for every table and view, and [docs/results.md](docs/results.md) for every measured number.
 
 ## Headline results
 
@@ -51,7 +51,7 @@ pip install -r requirements.txt
 Copy-Item .env.example .env
 ```
 
-4. Download `DataCoSupplyChainDataset.csv` from Kaggle (dataset "DataCo SMART SUPPLY CHAIN FOR BIG DATA ANALYSIS" by Shashwat Tiwari) and save it as `data\raw\DataCoSupplyChainDataset.csv`. The file is about 96 MB and is not in the repository.
+4. Download `DataCoSupplyChainDataset.csv` from Kaggle (dataset "DataCo SMART SUPPLY CHAIN FOR BIG DATA ANALYSIS" by Shashwat Tiwari) and create the folder first with `mkdir data\raw`, then save it as `data\raw\DataCoSupplyChainDataset.csv`. The file is about 96 MB and is not in the repository.
 
 5. Start Postgres and create the two extra databases that Airflow and Superset need (use your `POSTGRES_USER` from `.env`).
 
@@ -172,4 +172,5 @@ tests/                 unit tests
 - Demand-spike detection is weak. A more robust baseline (median and MAD) made it worse, and the result is kept as a documented negative result.
 - The hourly DAG does not re-run the forecast, so the Forecasts and What-If dashboards stay as of the last manual run.
 - MailHog is a local test mailbox. Real email would need SMTP settings and credentials.
+- The Airflow image installs its Python packages without pinned versions, so a rebuild months from now could pick up newer releases than the ones measured here (`requirements.txt` pins the versions used on the development machine).
 - Not tested from a clean install: the whole Quick start run, and the Superset dashboard import.
