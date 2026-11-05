@@ -48,7 +48,7 @@ def refresh_once() -> dict:
         )
         conn.execute(
             text(
-                "UPDATE pipeline_runs SET finished_at = now(), orders_seen = :n, status = 'success' "
+                "UPDATE pipeline_runs SET finished_at = clock_timestamp(), orders_seen = :n, status = 'success' "
                 "WHERE run_id = :r"
             ),
             {"n": orders_seen, "r": run_id},
